@@ -184,3 +184,88 @@ export interface ScriptResult {
   stderr: string;
   exitCode: number;
 }
+
+// ── Search config ──
+export interface SearchConfig {
+  roles: string[];
+  experienceMin: number;
+  experienceMax: number;
+  roleExperienceMin: number;
+  locations: string[];
+  jobType: string[];
+  seniority: string[];
+  sources: {
+    linkedin: boolean;
+    indeed: boolean;
+    glassdoor: boolean;
+    greenhouse: boolean;
+  };
+  salaryMin: number;
+  keywords: string[];
+  excludeKeywords: string[];
+}
+
+// ── Scan result ──
+export interface ScanResult {
+  company: string;
+  title: string;
+  url: string;
+  source: "linkedin" | "indeed" | "glassdoor" | "greenhouse";
+  postedDate?: string;
+  location?: string;
+}
+
+// ── Q&A store ──
+export interface QAEntry {
+  id: string;
+  pattern: string;
+  answer: string;
+  context?: string;
+  usedCount: number;
+  lastUsed: string;
+}
+
+// ── Auto-apply job ──
+export interface AutoApplyJob {
+  id: string;
+  url: string;
+  company: string;
+  title: string;
+  source: string;
+  score: number | null;
+  scoreRaw?: string;
+  reportPath?: string;
+  tailoredPdfPath?: string;
+  applyMode: "auto" | "prepare" | "skip";
+  status:
+    | "discovered"
+    | "evaluating"
+    | "scored"
+    | "tailoring"
+    | "tailored"
+    | "preparing"
+    | "ready"
+    | "applied"
+    | "manual"
+    | "skipped"
+    | "failed";
+  error?: string;
+  questions?: Array<{ question: string; answer?: string; confidence?: number }>;
+}
+
+// ── Pipeline run state ──
+export interface PipelineRunState {
+  id: string;
+  startedAt: string;
+  stage: "scanning" | "evaluating" | "tailoring" | "applying" | "done";
+  jobs: AutoApplyJob[];
+  config: SearchConfig;
+}
+
+// ── Auth status ──
+export interface AuthStatus {
+  linkedin: { authenticated: boolean; lastLogin?: string };
+  indeed: { authenticated: boolean; lastLogin?: string };
+  glassdoor: { authenticated: boolean; lastLogin?: string };
+  greenhouse: { authenticated: boolean; lastLogin?: string };
+}

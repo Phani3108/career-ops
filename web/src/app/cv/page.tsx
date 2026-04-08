@@ -1,22 +1,25 @@
 "use client";
 
-import { useCv, useSaveCv, useOutputs } from "@/hooks/use-career-ops";
+import { useCv, useSaveCv, useOutputs, useUploadResume } from "@/hooks/use-career-ops";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MarkdownRenderer } from "@/components/common/MarkdownRenderer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, FileDown, File } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Save, FileDown, File, Upload, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 
 export default function CvPage() {
   const { data: cvData, isLoading } = useCv();
   const { data: outputsData } = useOutputs();
   const saveCv = useSaveCv();
+  const uploadResume = useUploadResume();
   const [content, setContent] = useState("");
   const [isDirty, setIsDirty] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const outputs = outputsData?.data || [];
 
@@ -36,6 +39,42 @@ export default function CvPage() {
       onError: () => toast.error("Failed to save CV"),
     });
   };
+
+  const handleFile = useCallback((file: File) => {
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      toast.error("Please upload a PDF file");
+      return;
+    }
+    uploadResume.mutate(file, {
+      onSuccess: (res) => {
+        if (res.error) {
+          toast.error(res.error);
+        } else {
+          toast.success("Resume uploaded and converted to markdown");
+          setContent(res.data.markdown);
+          setIsDirty(false);
+        }
+      },
+      onError: () => toast.error("Upload failed"),
+    });
+  }, [uploadResume]);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => setDragging(false), []);
 
   if (isLoading) {
     return (
@@ -60,6 +99,53 @@ export default function CvPage() {
       </div>
 
       <Tabs defaultValue="editor">
+
+        {/* PDF Upload Zone */}
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={`mb-4 rounded-xl border-2 border-dashed transition-colors p-6 text-center cursor-pointer ${
+            dragging
+              ? "border-blue-400 bg-blue-50"
+              : uploadResume.isPending
+              ? "border-amber-300 bg-amber-50"
+              : "border-gray-200 hover:border-gray-300 bg-gray-50/50"
+          }`}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".pdf"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFile(file);
+              e.target.value = "";
+            }}
+          />
+          {uploadResume.isPending ? (
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 text-amber-500 animate-spin" />
+              <p className="text-sm font-medium text-amber-700">
+                Extracting text &amp; converting to markdown...
+              </p>
+              <p className="text-xs text-amber-500">This may take 30-60 seconds with Claude CLI</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <Upload className="h-8 w-8 text-gray-400" />
+              <p className="text-sm font-medium text-gray-600">
+                Drop your PDF resume here or click to upload
+              </p>
+              <p className="text-xs text-gray-400">
+                Extracts text → converts to structured Markdown → saves as cv.md
+              </p>
+            </div>
+          )}
+        </div>
+
         <TabsList>
           <TabsTrigger value="editor">Editor</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>

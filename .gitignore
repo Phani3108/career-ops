@@ -17,10 +17,16 @@ jds/*
 
 # User config and customization (never auto-updated)
 config/profile.yml
+config/.auth/
+config/search-config.json
 portals.yml
 modes/_profile.md
 .update-dismissed
 .update-lock
+
+# User data (auto-apply pipeline)
+data/qa-store.json
+data/auto-pipeline-state.json
 
 # Generated
 .resolved-prompt-*

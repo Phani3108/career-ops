@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Application, PipelineMetrics, CanonicalState } from "@/lib/types";
+import type { Application, PipelineMetrics, CanonicalState, SearchConfig, AuthStatus } from "@/lib/types";
 
 // ── Applications + Metrics ──
 export function useApplications() {
@@ -162,5 +162,81 @@ export function useRunScript() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ args }),
       }).then((r) => r.json()),
+  });
+}
+
+// ── PDF Upload ──
+export function useUploadResume() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      return fetch("/api/cv/upload", { method: "POST", body: fd }).then((r) => r.json());
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cv"] }),
+  });
+}
+
+// ── Search Config ──
+export function useSearchConfig() {
+  return useQuery<{ data: SearchConfig }>({
+    queryKey: ["search-config"],
+    queryFn: () => fetch("/api/search-config").then((r) => r.json()),
+  });
+}
+
+export function useSaveSearchConfig() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (config: SearchConfig) =>
+      fetch("/api/search-config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config }),
+      }).then((r) => r.json()),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["search-config"] }),
+  });
+}
+
+// ── Auth Status ──
+export function useAuthStatus() {
+  return useQuery<{ data: AuthStatus }>({
+    queryKey: ["auth-status"],
+    queryFn: () => fetch("/api/auth/login").then((r) => r.json()),
+  });
+}
+
+export function useLogin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (platform: string) =>
+      fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform }),
+      }).then((r) => r.json()),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth-status"] }),
+  });
+}
+
+// ── Q&A Store ──
+export function useQAStore() {
+  return useQuery({
+    queryKey: ["qa-store"],
+    queryFn: () => fetch("/api/qa-store").then((r) => r.json()),
+  });
+}
+
+export function useSaveQA() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (entry: { pattern: string; answer: string; context?: string }) =>
+      fetch("/api/qa-store", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry),
+      }).then((r) => r.json()),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["qa-store"] }),
   });
 }

@@ -19,6 +19,7 @@ import {
   Lightbulb,
   Menu,
   X,
+  Rocket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -26,6 +27,7 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/auto-apply", label: "Auto Apply", icon: Rocket },
   { href: "/evaluate", label: "Evaluate", icon: Sparkles },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/pipeline", label: "Pipeline", icon: Inbox },

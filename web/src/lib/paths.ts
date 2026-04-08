@@ -34,6 +34,11 @@ export const paths = {
   fontsDir: path.join(ROOT, "fonts"),
   dataDir: path.join(ROOT, "data"),
   version: path.join(ROOT, "VERSION"),
+  // New: auto-apply pipeline
+  searchConfig: path.join(ROOT, "config", "search-config.json"),
+  qaStore: path.join(ROOT, "data", "qa-store.json"),
+  authDir: path.join(ROOT, "config", ".auth"),
+  autoPipelineState: path.join(ROOT, "data", "auto-pipeline-state.json"),
   // Scripts
   scripts: {
     generatePdf: path.join(ROOT, "generate-pdf.mjs"),
