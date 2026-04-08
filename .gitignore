@@ -25,6 +25,8 @@ modes/_profile.md
 # Generated
 .resolved-prompt-*
 node_modules/
+web/.next/
+web/node_modules/
 
 # OS
 .DS_Store
