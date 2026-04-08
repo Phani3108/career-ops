@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   Rocket,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -38,6 +39,7 @@ const navItems = [
   { href: "/training", label: "Training", icon: GraduationCap },
   { href: "/project", label: "Project Eval", icon: Lightbulb },
   { href: "/batch", label: "Batch", icon: Layers },
+  { href: "/setup", label: "Setup & Guide", icon: Wrench },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/health", label: "Health", icon: HeartPulse },
 ];
